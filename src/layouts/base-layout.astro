@@ -1,0 +1,74 @@
+---
+import '@/styles/global.css';
+import SeoHead from '@/components/seo-head.astro';
+import SiteNavigation from '@/components/site-navigation.astro';
+import Footer from '@/components/footer.astro';
+import StickyMiniPlayer from '@/components/sticky-mini-player.astro';
+import { UI } from '@/lib/constants';
+
+export interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+  ogType?: 'website' | 'article';
+}
+
+const { title, description, ogImage, ogType } = Astro.props;
+const currentPath = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- Google Fonts: Nunito (headings) + Source Sans 3 (body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <SeoHead
+      title={title}
+      description={description}
+      ogImage={ogImage}
+      ogType={ogType}
+    />
+
+    <!-- Cloudflare Web Analytics -->
+    <script
+      is:inline
+      defer
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon='{"token": ""}'
+    ></script>
+  </head>
+  <body class="flex min-h-screen flex-col bg-parchment text-deep-warm-brown">
+    <!-- Skip Link (a11y) -->
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded focus:bg-terracotta focus:px-4 focus:py-2 focus:text-soft-white focus:outline-none"
+    >
+      {UI.labels.skipToContent}
+    </a>
+
+    <SiteNavigation currentPath={currentPath} />
+
+    <main id="main" class="flex-1">
+      <slot />
+    </main>
+
+    <Footer />
+    <StickyMiniPlayer />
+
+    <!-- Alpine.js — interactive components -->
+    <script>
+      import '@/lib/alpine-init';
+    </script>
+  </body>
+</html>

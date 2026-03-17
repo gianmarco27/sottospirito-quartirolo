@@ -1,0 +1,54 @@
+---
+/**
+ * EmptyState — configurable empty/error message component.
+ * Used for: no filter results, no search results, generic empty states.
+ * role="alert" for dynamic states so screen readers announce it.
+ */
+export interface Props {
+  message: string;
+  actionLabel?: string;
+  actionHref?: string;
+  /** If true, uses role="alert" for screen reader announcement */
+  dynamic?: boolean;
+}
+
+const { message, actionLabel, actionHref, dynamic = false } = Astro.props;
+---
+
+<div
+  class="flex flex-col items-center justify-center rounded-lg border border-warm-sand bg-soft-white px-6 py-12 text-center"
+  role={dynamic ? 'alert' : undefined}
+>
+  {/* Gentle illustration — a small decorative SVG */}
+  <svg
+    class="mb-4 h-12 w-12 text-warm-sand"
+    viewBox="0 0 48 48"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="24" cy="24" r="20" />
+    <path d="M16 28c2 3 5 4 8 4s6-1 8-4" />
+    <circle cx="18" cy="20" r="1.5" fill="currentColor" stroke="none" />
+    <circle cx="30" cy="20" r="1.5" fill="currentColor" stroke="none" />
+  </svg>
+
+  <p class="mb-4 text-lg text-deep-warm-brown/80">
+    {message}
+  </p>
+
+  {actionLabel && actionHref && (
+    <a
+      href={actionHref}
+      class="inline-block min-h-11 rounded-lg border border-terracotta px-6 py-3 font-medium text-terracotta transition-colors hover:bg-terracotta hover:text-soft-white focus-visible:ring-2 focus-visible:ring-warm-indigo focus-visible:outline-none"
+    >
+      {actionLabel}
+    </a>
+  )}
+
+  {/* Slot for custom action buttons (e.g., Alpine.js "Rimuovi filtri" button) */}
+  <slot />
+</div>

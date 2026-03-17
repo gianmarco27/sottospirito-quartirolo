@@ -1,0 +1,67 @@
+---
+/**
+ * SiteNavigation — persistent top nav on all pages.
+ * Logo/site name left, Home · Archivio right.
+ * Active page: terracotta underline + aria-current="page".
+ * Scrolled state: subtle shadow via Alpine.js (tiny inline component).
+ */
+import { UI } from '@/lib/constants';
+
+export interface Props {
+  currentPath: string;
+}
+
+const { currentPath } = Astro.props;
+
+const links = [
+  { href: '/', label: UI.labels.home },
+  { href: '/episodi/', label: UI.labels.archive },
+];
+
+function isActive(linkHref: string, current: string): boolean {
+  if (linkHref === '/') return current === '/' || current === '';
+  return current.startsWith(linkHref);
+}
+---
+
+<nav
+  aria-label={UI.labels.mainNavigation}
+  x-data="{ scrolled: false }"
+  x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > 10 }, { passive: true })"
+  :class="{ 'shadow-md': scrolled }"
+  class="sticky top-0 z-30 border-b border-warm-sand bg-parchment transition-shadow"
+>
+  <div class="mx-auto flex max-w-[var(--max-w-grid)] items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+    {/* Site name / logo */}
+    <a
+      href="/"
+      class="font-heading text-xl font-bold text-deep-warm-brown transition-colors hover:text-terracotta focus-visible:rounded focus-visible:ring-2 focus-visible:ring-warm-indigo focus-visible:outline-none"
+    >
+      {UI.site.name}
+    </a>
+
+    {/* Navigation links */}
+    <ul class="flex items-center gap-1 sm:gap-4">
+      {links.map((link) => {
+        const active = isActive(link.href, currentPath);
+        return (
+          <li>
+            <a
+              href={link.href}
+              aria-current={active ? 'page' : undefined}
+              class:list={[
+                'inline-block min-h-11 min-w-11 px-3 py-2 text-sm font-medium transition-colors',
+                'focus-visible:rounded focus-visible:ring-2 focus-visible:ring-warm-indigo focus-visible:outline-none',
+                active
+                  ? 'border-b-2 border-terracotta text-terracotta'
+                  : 'text-deep-warm-brown/70 hover:text-terracotta',
+              ]}
+            >
+              {link.label}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+</nav>

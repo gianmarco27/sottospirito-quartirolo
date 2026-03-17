@@ -1,0 +1,126 @@
+---
+import BaseLayout from '@/layouts/base-layout.astro';
+import EpisodeCard from '@/components/episode-card.astro';
+import EmptyState from '@/components/empty-state.astro';
+import { getCollection } from 'astro:content';
+import { UI } from '@/lib/constants';
+
+const allEpisodes = await getCollection('episodes');
+const publishedEpisodes = allEpisodes
+  .filter((e) => e.data.publishDate <= new Date())
+  .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime());
+
+const allCategories = [...new Set(publishedEpisodes.map((e) => e.data.category))].sort();
+---
+
+<BaseLayout
+  title={UI.labels.allEpisodes}
+  description={`${UI.labels.allEpisodes} — ${UI.site.name}`}
+>
+  <div class="mx-auto max-w-[var(--max-w-grid)] px-4 py-8 sm:px-6 lg:px-8">
+    <h1 class="mb-8 font-heading text-4xl font-bold">{UI.labels.allEpisodes}</h1>
+
+    <!-- Pagefind Search -->
+    <div class="mb-8">
+      <div id="search" class="pagefind-ui" data-pagefind-ui></div>
+    </div>
+
+    <!-- Category Filter Chips (Alpine.js) -->
+    {allCategories.length > 0 && (
+      <div x-data="tagFilter" role="group" aria-label={UI.labels.filterByCategory} class="mb-8 flex flex-wrap items-center gap-2">
+        {allCategories.map((category) => (
+          <button
+            type="button"
+            role="checkbox"
+            :aria-pressed={`isActive('${category}').toString()`}
+            @click={`toggle('${category}')`}
+            :class={`isActive('${category}') ? 'border-warm-indigo bg-warm-indigo text-soft-white' : 'border-warm-sand text-deep-warm-brown hover:border-warm-indigo hover:text-warm-indigo'`}
+            class="min-h-11 rounded-full border px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-warm-indigo focus-visible:outline-none"
+          >
+            {category}
+          </button>
+        ))}
+        <button
+          type="button"
+          x-show="activeTags.length > 0"
+          x-cloak
+          @click="clearAll()"
+          class="min-h-11 rounded-full px-4 py-2 text-sm font-medium text-terracotta underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:ring-warm-indigo focus-visible:outline-none"
+        >
+          {UI.labels.removeFilters}
+        </button>
+      </div>
+    )}
+
+    <!-- Episode Grid -->
+    <div class="grid gap-6 sm:grid-cols-2">
+      {publishedEpisodes.map((episode) => (
+        <div data-episode-card data-category={episode.data.category} data-tags={episode.data.tags.join(',')}>
+          <EpisodeCard
+            slug={episode.id}
+            title={episode.data.title}
+            description={episode.data.description}
+            publishDate={episode.data.publishDate}
+            duration={episode.data.duration}
+            category={episode.data.category}
+            infographic={episode.data.infographic}
+            infographicAlt={episode.data.infographicAlt}
+            size="full"
+          />
+        </div>
+      ))}
+    </div>
+
+    <!-- Empty state for filter (hidden by default, shown via Alpine) -->
+    <div data-empty-filter style="display: none;">
+      <EmptyState message={UI.errors.noFilterResults} dynamic>
+        <button
+          type="button"
+          @click="clearAll()"
+          class="mt-4 inline-block min-h-11 rounded-lg border border-terracotta px-6 py-3 font-medium text-terracotta transition-colors hover:bg-terracotta hover:text-soft-white focus-visible:ring-2 focus-visible:ring-warm-indigo focus-visible:outline-none"
+        >
+          {UI.labels.removeFilters}
+        </button>
+      </EmptyState>
+    </div>
+  </div>
+
+  {/* Pagefind lazy-load script */}
+  <script is:inline>
+    (function() {
+      function initPagefind() {
+        var el = document.getElementById('search');
+        if (!el || el.dataset.loaded) return;
+        el.dataset.loaded = 'true';
+
+        // Load CSS
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = '/pagefind/pagefind-ui.css';
+        document.head.appendChild(link);
+
+        // Load JS
+        var script = document.createElement('script');
+        script.src = '/pagefind/pagefind-ui.js';
+        script.onload = function() {
+          new window.PagefindUI({
+            element: '#search',
+            showSubResults: false,
+            showImages: false,
+            translations: {
+              placeholder: 'Cerca episodi...',
+              zero_results: 'Nessun episodio trovato per "[SEARCH_TERM]"',
+            },
+          });
+        };
+        document.head.appendChild(script);
+      }
+
+      var searchEl = document.getElementById('search');
+      if (searchEl) {
+        searchEl.addEventListener('focusin', initPagefind, { once: true });
+        searchEl.addEventListener('click', initPagefind, { once: true });
+      }
+    })();
+  </script>
+</BaseLayout>

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicolo-ribaudo/oxc-project/refs/heads/nicolo/json-schema/npm/oxlint/configuration_schema.json",
+  "ignorePatterns": [
+    "dist",
+    ".astro",
+    "node_modules",
+    "*.astro"
+  ],
+  "rules": {
+    "no-unused-vars": "warn"
+  }
+}

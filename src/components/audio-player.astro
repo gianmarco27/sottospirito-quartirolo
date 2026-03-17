@@ -1,0 +1,121 @@
+---
+/**
+ * AudioPlayer — expanded audio player for episode pages.
+ * Wraps the Alpine.js audioPlayer component.
+ * Data passed via data-* attributes (no inline JSON blobs).
+ */
+import { UI } from '@/lib/constants';
+
+export interface Props {
+  episodeSlug: string;
+  audioUrl: string;
+  title: string;
+}
+
+const { episodeSlug, audioUrl, title } = Astro.props;
+---
+
+<div
+  x-data="audioPlayer"
+  data-audio-player
+  data-episode-slug={episodeSlug}
+  data-audio-url={audioUrl}
+  class="rounded-xl bg-soft-white p-4 shadow-sm"
+>
+  <audio preload="none" class="hidden">
+    <track kind="captions" />
+  </audio>
+
+  <!-- Error state -->
+  <div x-show="error" x-cloak class="text-center text-sm text-terracotta" role="alert">
+    {UI.errors.audioLoad}
+  </div>
+
+  <!-- Player controls -->
+  <div x-show="!error" class="flex flex-col gap-3">
+    <!-- Play button + title + time -->
+    <div class="flex items-center gap-4">
+      <button
+        type="button"
+        @click="togglePlay()"
+        @keydown.space.prevent="togglePlay()"
+        :aria-label="playing ? '{UI.labels.pause}' : '{UI.labels.play}'"
+        class="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full bg-terracotta text-soft-white transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-warm-indigo focus-visible:outline-none"
+      >
+        <!-- Loading spinner -->
+        <svg
+          x-show="loading"
+          x-cloak
+          class="h-6 w-6 animate-spin"
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity="0.3"></circle>
+          <path
+            d="M4 12a8 8 0 018-8"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+          ></path>
+        </svg>
+        <!-- Play icon -->
+        <svg
+          x-show="!loading && !playing"
+          class="ml-1 h-6 w-6"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path d="M8 5v14l11-7z" />
+        </svg>
+        <!-- Pause icon -->
+        <svg
+          x-show="!loading && playing"
+          x-cloak
+          class="h-6 w-6"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+        </svg>
+      </button>
+
+      <div class="min-w-0 flex-1">
+        <p class="truncate font-heading text-sm font-semibold text-deep-warm-brown">
+          {title}
+        </p>
+        <p class="text-xs text-deep-warm-brown/50">
+          <span x-text="formatTime(currentTime)">0:00</span>
+          <span class="mx-1">/</span>
+          <span x-text="formatTime(duration)">0:00</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div
+      @click="seek($event)"
+      @touchstart.passive="seek($event)"
+      class="group relative h-2 cursor-pointer rounded-full bg-warm-sand"
+      role="slider"
+      :aria-valuenow="Math.round(currentTime)"
+      :aria-valuemax="Math.round(duration)"
+      aria-valuemin="0"
+      aria-label="Progresso audio"
+      tabindex="0"
+      @keydown.left.prevent="seekRelative(-10)"
+      @keydown.right.prevent="seekRelative(10)"
+    >
+      <div
+        class="absolute inset-y-0 left-0 rounded-full bg-terracotta transition-[width] duration-100"
+        :style="{ width: progressPercent + '%' }"
+      ></div>
+      <div
+        class="absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-terracotta opacity-0 shadow transition-opacity group-hover:opacity-100"
+        :style="{ left: `calc(${progressPercent}% - 8px)` }"
+      ></div>
+    </div>
+  </div>
+</div>

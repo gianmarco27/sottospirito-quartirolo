@@ -1,0 +1,22 @@
+---
+import BaseLayout from '@/layouts/base-layout.astro';
+import { UI } from '@/lib/constants';
+---
+
+<BaseLayout
+  title={UI.errors.notFound}
+  description={UI.errors.notFound}
+>
+  <div class="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
+    <h1 class="mb-4 font-heading text-4xl font-bold text-deep-warm-brown">404</h1>
+    <p class="mb-6 text-lg text-deep-warm-brown/80">
+      {UI.errors.notFound}
+    </p>
+    <a
+      href="/"
+      class="inline-block rounded-lg border border-terracotta px-6 py-3 font-medium text-terracotta transition-colors hover:bg-terracotta hover:text-soft-white min-h-11"
+    >
+      {UI.errors.goHome}
+    </a>
+  </div>
+</BaseLayout>

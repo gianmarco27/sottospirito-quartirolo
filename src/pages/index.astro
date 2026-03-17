@@ -1,0 +1,86 @@
+---
+import BaseLayout from '@/layouts/base-layout.astro';
+import EpisodeCard from '@/components/episode-card.astro';
+import { getCollection } from 'astro:content';
+import { UI } from '@/lib/constants';
+
+const homePages = await getCollection('pages');
+const homePage = homePages.find((p) => p.id === 'home');
+
+const allEpisodes = await getCollection('episodes');
+const publishedEpisodes = allEpisodes
+  .filter((e) => e.data.publishDate <= new Date())
+  .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime());
+
+const featuredEpisodes = publishedEpisodes.filter((e) => e.data.featured);
+const latestEpisodes = publishedEpisodes.slice(0, 6);
+---
+
+<BaseLayout
+  title={homePage?.data.title ?? UI.site.name}
+  description={homePage?.data.welcomeBody ?? UI.site.description}
+>
+  <div class="mx-auto max-w-[var(--max-w-grid)] px-4 py-8 sm:px-6 lg:px-8">
+    <!-- Welcome Section -->
+    {homePage?.data.welcomeHeading && (
+      <section class="mb-12 text-center">
+        <h1 class="mb-4 font-heading text-4xl font-bold text-deep-warm-brown">
+          {homePage.data.welcomeHeading}
+        </h1>
+        {homePage.data.welcomeBody && (
+          <p class="mx-auto max-w-[var(--max-w-reading)] text-lg text-deep-warm-brown/80">
+            {homePage.data.welcomeBody}
+          </p>
+        )}
+      </section>
+    )}
+
+    <!-- Featured Episodes -->
+    {featuredEpisodes.length > 0 && (
+      <section class="mb-12" aria-label={UI.labels.featuredEpisodes}>
+        <h2 class="mb-6 font-heading text-2xl font-semibold">
+          {UI.labels.featuredEpisodes}
+        </h2>
+        <div class="grid gap-6 sm:grid-cols-2">
+          {featuredEpisodes.map((episode) => (
+            <EpisodeCard
+              slug={episode.id}
+              title={episode.data.title}
+              description={episode.data.description}
+              publishDate={episode.data.publishDate}
+              duration={episode.data.duration}
+              category={episode.data.category}
+              infographic={episode.data.infographic}
+              infographicAlt={episode.data.infographicAlt}
+              size="full"
+            />
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Latest Episodes -->
+    {latestEpisodes.length > 0 && (
+      <section aria-label={UI.labels.latestEpisodes}>
+        <h2 class="mb-6 font-heading text-2xl font-semibold">
+          {UI.labels.latestEpisodes}
+        </h2>
+        <div class="grid gap-6 sm:grid-cols-2">
+          {latestEpisodes.map((episode) => (
+            <EpisodeCard
+              slug={episode.id}
+              title={episode.data.title}
+              description={episode.data.description}
+              publishDate={episode.data.publishDate}
+              duration={episode.data.duration}
+              category={episode.data.category}
+              infographic={episode.data.infographic}
+              infographicAlt={episode.data.infographicAlt}
+              size="full"
+            />
+          ))}
+        </div>
+      </section>
+    )}
+  </div>
+</BaseLayout>

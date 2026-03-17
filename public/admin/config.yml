@@ -1,0 +1,63 @@
+backend:
+  name: github
+  repo: owner/sottoSpirito
+  branch: main
+  base_url: https://sottospirito-cms-auth.<your-subdomain>.workers.dev
+
+media_folder: /src/content/media
+public_folder: /content/media
+
+media_libraries:
+  default:
+    config:
+      max_file_size: 5242880
+      slugify_filename: true
+      transformations:
+        raster_image:
+          format: webp
+          quality: 85
+          width: 2048
+          height: 2048
+        svg:
+          optimize: true
+  cloudflare_r2:
+    access_key_id: <R2_ACCESS_KEY_ID>
+    bucket: sottospirito-media
+    account_id: <CLOUDFLARE_ACCOUNT_ID>
+    public_url: https://media.sottospirito.it
+    prefix: episodes/
+
+collections:
+  - name: episodes
+    label: Episodi
+    folder: src/content/episodes
+    create: true
+    slug: "{{slug}}"
+    path: "{{slug}}/index"
+    media_folder: ""
+    public_folder: ""
+    fields:
+      - { name: title, label: Titolo, widget: string }
+      - { name: description, label: Descrizione, widget: text }
+      - { name: publishDate, label: "Data di pubblicazione", widget: datetime, date_format: "YYYY-MM-DD", time_format: false }
+      - { name: audioUrl, label: Audio, widget: file }
+      - { name: infographic, label: Infografica, widget: image }
+      - { name: infographicAlt, label: "Testo alternativo infografica", widget: string }
+      - { name: duration, label: Durata, widget: string, pattern: ['^\d+:\d{2}$', "Formato: MM:SS"] }
+      - { name: tags, label: Tag, widget: list }
+      - { name: category, label: Categoria, widget: select, options: [Relazioni, Fede, Crescita, Comunità] }
+      - { name: featured, label: "In evidenza", widget: boolean, default: false }
+      - { name: body, label: Contenuto, widget: markdown }
+
+  - name: pages
+    label: Pagine
+    files:
+      - name: home
+        label: Homepage
+        file: src/content/pages/home.md
+        fields:
+          - { name: title, label: Titolo, widget: string }
+          - { name: welcomeHeading, label: "Titolo benvenuto", widget: string }
+          - { name: welcomeBody, label: "Testo benvenuto", widget: text }
+          - { name: heroImage, label: "Immagine hero", widget: image, required: false }
+          - { name: heroImageAlt, label: "Testo alternativo hero", widget: string, required: false }

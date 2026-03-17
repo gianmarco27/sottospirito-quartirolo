@@ -1,0 +1,72 @@
+---
+/**
+ * EpisodeHero — full hero component for episode detail pages.
+ * Displays infographic, title, metadata row, description, and AudioPlayer.
+ * Responsive: single column mobile, 2-col desktop.
+ */
+import { Picture } from 'astro:assets';
+import { formatDate } from '@/lib/format-date';
+import AudioPlayer from '@/components/audio-player.astro';
+import type { ImageMetadata } from 'astro';
+
+export interface Props {
+  slug: string;
+  title: string;
+  description: string;
+  publishDate: Date;
+  duration: string;
+  category: string;
+  audioUrl: string;
+  infographic: ImageMetadata;
+  infographicAlt: string;
+}
+
+const {
+  slug,
+  title,
+  description,
+  publishDate,
+  duration,
+  category,
+  audioUrl,
+  infographic,
+  infographicAlt,
+} = Astro.props;
+---
+
+<header class="mb-8 md:grid md:grid-cols-2 md:gap-8">
+  {/* Infographic */}
+  <div class="mb-6 md:mb-0">
+    <Picture
+      src={infographic}
+      formats={['avif', 'webp']}
+      widths={[400, 800, 1200]}
+      sizes="(min-width: 768px) 50vw, 100vw"
+      alt={infographicAlt || ''}
+      class="w-full rounded-lg"
+    />
+  </div>
+
+  {/* Content */}
+  <div class="flex flex-col justify-center">
+    <h1 class="mb-3 font-heading text-4xl font-bold text-deep-warm-brown">
+      {title}
+    </h1>
+    <p class="mb-4 text-sm text-deep-warm-brown/60">
+      {formatDate(publishDate)} · {duration} ·
+      <span class="inline-block rounded bg-warm-indigo/10 px-2 py-0.5 text-xs font-medium text-warm-indigo">
+        {category}
+      </span>
+    </p>
+    <p class="mb-6 text-lg text-deep-warm-brown/80">
+      {description}
+    </p>
+
+    {/* Audio Player */}
+    <AudioPlayer
+      episodeSlug={slug}
+      audioUrl={audioUrl}
+      title={title}
+    />
+  </div>
+</header>

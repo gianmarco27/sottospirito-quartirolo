@@ -1,0 +1,84 @@
+---
+import BaseLayout from '@/layouts/base-layout.astro';
+import EpisodeHero from '@/components/episode-hero.astro';
+import AltriEpisodiStrip from '@/components/altri-episodi-strip.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const episodes = await getCollection('episodes');
+  return episodes.map((episode) => ({
+    params: { slug: episode.id },
+    props: { episode },
+  }));
+}
+
+const { episode } = Astro.props;
+const { Content } = await render(episode);
+
+// Get other episodes for the "Altri episodi" strip
+// Prefer same category, then most recent, excluding current episode
+const allEpisodes = await getCollection('episodes');
+const otherEpisodes = allEpisodes
+  .filter((e) => e.id !== episode.id && e.data.publishDate <= new Date())
+  .sort((a, b) => {
+    // Same category first
+    const aMatch = a.data.category === episode.data.category ? -1 : 1;
+    const bMatch = b.data.category === episode.data.category ? -1 : 1;
+    if (aMatch !== bMatch) return aMatch - bMatch;
+    // Then by date
+    return b.data.publishDate.getTime() - a.data.publishDate.getTime();
+  })
+  .slice(0, 3)
+  .map((e) => ({
+    slug: e.id,
+    title: e.data.title,
+    description: e.data.description,
+    publishDate: e.data.publishDate,
+    duration: e.data.duration,
+    category: e.data.category,
+    infographic: e.data.infographic,
+    infographicAlt: e.data.infographicAlt,
+  }));
+---
+
+<BaseLayout
+  title={episode.data.title}
+  description={episode.data.description}
+  ogImage={episode.data.infographic.src}
+  ogType="article"
+>
+  <article class="mx-auto max-w-[var(--max-w-grid)] px-4 py-8 sm:px-6 lg:px-8">
+    <EpisodeHero
+      slug={episode.id}
+      title={episode.data.title}
+      description={episode.data.description}
+      publishDate={episode.data.publishDate}
+      duration={episode.data.duration}
+      category={episode.data.category}
+      audioUrl={episode.data.audioUrl}
+      infographic={episode.data.infographic}
+      infographicAlt={episode.data.infographicAlt}
+    />
+
+    <!-- Episode Body (Markdown) -->
+    <div class="prose prose-lg mx-auto max-w-[var(--max-w-reading)]">
+      <Content />
+    </div>
+
+    <!-- Tags -->
+    {episode.data.tags.length > 0 && (
+      <div class="mx-auto mt-8 max-w-[var(--max-w-reading)]">
+        <div class="flex flex-wrap gap-2">
+          {episode.data.tags.map((tag: string) => (
+            <span class="rounded-full border border-warm-sand px-3 py-1 text-sm text-deep-warm-brown/70">
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <!-- Altri episodi -->
+    <AltriEpisodiStrip episodes={otherEpisodes} />
+  </article>
+</BaseLayout>
