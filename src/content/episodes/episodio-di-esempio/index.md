@@ -1,14 +1,14 @@
 ---
-title: "Episodio di esempio"
-description: "Questo è un episodio di esempio per verificare che il sistema funzioni correttamente. Sostituiscilo con un vero episodio quando sei pronto."
+title: Episodio di esempio
+description: Questo è un episodio di esempio per verificare che il sistema funzioni correttamente. Sostituiscilo con un vero episodio quando sei pronto.
 publishDate: 2026-03-14
-audioUrl: "https://media.sottospirito.org/episodes/episodio-di-esempio/audio.mp3"
-infographic: "./infographic.png"
-infographicAlt: "Illustrazione di esempio per il primo episodio"
-duration: "5:30"
+audioUrl: https://media.sottospirito.org/episodes/episodio-di-esempio/audio.mp3
+infographic: infographic.png
+infographicAlt: Illustrazione di esempio per il primo episodio
+duration: 5:30
 tags:
   - esempio
-category: "Fede"
+category: Fede
 featured: true
 ---
 
