@@ -22,7 +22,7 @@ const { episodeSlug, audioUrl, title } = Astro.props;
   data-audio-url={audioUrl}
   class="rounded-xl bg-soft-white p-4 shadow-sm"
 >
-  <audio preload="none" class="hidden">
+  <audio preload="metadata" class="hidden">
     <track kind="captions" />
   </audio>
 

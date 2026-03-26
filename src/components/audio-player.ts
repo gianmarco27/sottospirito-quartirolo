@@ -25,7 +25,7 @@ export function audioPlayer() {
       if (!this.audio) return;
 
       this.audio.src = this.audioUrl;
-      this.audio.preload = 'none';
+      this.audio.preload = 'metadata';
 
       // Restore resume position from listen history
       const store = Alpine.store('player') as Record<string, unknown>;
@@ -53,7 +53,6 @@ export function audioPlayer() {
         this.currentTime = this.audio!.currentTime;
         const playerStore = Alpine.store('player') as Record<string, unknown>;
         playerStore.currentTime = this.currentTime;
-        playerStore.playing = this.playing;
 
         // Save progress periodically
         if (Math.floor(this.currentTime) % 5 === 0 && this.currentTime > 0) {
@@ -61,10 +60,18 @@ export function audioPlayer() {
         }
       });
 
-      this.audio.addEventListener('ended', () => {
+      this.audio.addEventListener('play', () => {
+        this.playing = true;
+        (Alpine.store('player') as Record<string, unknown>).playing = true;
+      });
+
+      this.audio.addEventListener('pause', () => {
         this.playing = false;
-        this.currentTime = 0;
         (Alpine.store('player') as Record<string, unknown>).playing = false;
+      });
+
+      this.audio.addEventListener('ended', () => {
+        this.currentTime = 0;
         this._saveProgress(true);
       });
 
@@ -79,7 +86,6 @@ export function audioPlayer() {
       this.audio.addEventListener('error', () => {
         this.error = true;
         this.loading = false;
-        this.playing = false;
       });
     },
 
@@ -90,19 +96,13 @@ export function audioPlayer() {
 
       if (this.playing) {
         this.audio.pause();
-        this.playing = false;
       } else {
         this.loading = true;
-        this.audio.play().then(() => {
-          this.playing = true;
-          this.loading = false;
-        }).catch(() => {
+        this.audio.play().catch(() => {
           this.error = true;
           this.loading = false;
         });
       }
-
-      (Alpine.store('player') as Record<string, unknown>).playing = this.playing;
     },
 
     seek(event: MouseEvent | TouchEvent) {

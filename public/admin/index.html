@@ -5,8 +5,134 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sotto Spirito — CMS</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      .upload-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.55);
+        color: #fff;
+        font-family: system-ui, sans-serif;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+      }
+      .upload-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .upload-bar-track {
+        width: 280px;
+        height: 6px;
+        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.25);
+        margin-top: 12px;
+        overflow: hidden;
+      }
+      .upload-bar-fill {
+        height: 100%;
+        border-radius: 3px;
+        background: #fff;
+        width: 0%;
+        transition: width 0.15s;
+      }
+      .upload-label {
+        font-size: 14px;
+        font-weight: 500;
+      }
+    </style>
   </head>
   <body>
+    <div id="upload-overlay" class="upload-overlay">
+      <span class="upload-label" id="upload-label">Caricamento in corso…</span>
+      <div class="upload-bar-track">
+        <div class="upload-bar-fill" id="upload-bar"></div>
+      </div>
+    </div>
+
+    <script>
+      // Intercept large uploads via XMLHttpRequest to show progress
+      (function () {
+        const THRESHOLD = 512 * 1024; // show overlay for uploads > 512 KB
+        const overlay = document.getElementById('upload-overlay');
+        const bar = document.getElementById('upload-bar');
+        const label = document.getElementById('upload-label');
+
+        const origOpen = XMLHttpRequest.prototype.open;
+        const origSend = XMLHttpRequest.prototype.send;
+
+        XMLHttpRequest.prototype.open = function (method) {
+          this._uploadMethod = method;
+          return origOpen.apply(this, arguments);
+        };
+
+        XMLHttpRequest.prototype.send = function (body) {
+          const size = body instanceof Blob ? body.size
+            : body instanceof ArrayBuffer ? body.byteLength
+            : typeof body === 'string' ? body.length
+            : 0;
+
+          if (size > THRESHOLD && /^(PUT|POST)$/i.test(this._uploadMethod || '')) {
+            overlay.classList.add('active');
+            bar.style.width = '0%';
+            label.textContent = 'Caricamento in corso…';
+
+            this.upload.addEventListener('progress', function (e) {
+              if (e.lengthComputable) {
+                const pct = Math.round((e.loaded / e.total) * 100);
+                bar.style.width = pct + '%';
+                label.textContent = 'Caricamento… ' + pct + '%';
+              }
+            });
+
+            const hide = function () { overlay.classList.remove('active'); };
+            this.upload.addEventListener('load', hide);
+            this.upload.addEventListener('error', function () {
+              label.textContent = 'Errore durante il caricamento';
+              setTimeout(hide, 2000);
+            });
+            this.addEventListener('loadend', hide);
+          }
+
+          return origSend.apply(this, arguments);
+        };
+
+        // Also wrap fetch for cases where the CMS uses fetch API
+        const origFetch = window.fetch;
+        window.fetch = function (input, init) {
+          const method = (init && init.method || 'GET').toUpperCase();
+          const body = init && init.body;
+          const size = body instanceof Blob ? body.size
+            : body instanceof ArrayBuffer ? body.byteLength
+            : typeof body === 'string' ? body.length
+            : 0;
+
+          if (size > THRESHOLD && (method === 'PUT' || method === 'POST')) {
+            overlay.classList.add('active');
+            bar.style.width = '5%';
+            label.textContent = 'Caricamento in corso…';
+
+            return origFetch.apply(this, arguments).then(function (response) {
+              bar.style.width = '100%';
+              label.textContent = 'Caricamento completato';
+              setTimeout(function () { overlay.classList.remove('active'); }, 600);
+              return response;
+            }).catch(function (err) {
+              label.textContent = 'Errore durante il caricamento';
+              setTimeout(function () { overlay.classList.remove('active'); }, 2000);
+              throw err;
+            });
+          }
+
+          return origFetch.apply(this, arguments);
+        };
+      })();
+    </script>
+
     <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js" type="module"></script>
   </body>
 </html>

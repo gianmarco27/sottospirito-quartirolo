@@ -43,11 +43,8 @@ export function stickyMiniPlayer() {
 
       if (this.store.playing) {
         audio.pause();
-        this.store.playing = false;
       } else {
-        audio.play().then(() => {
-          this.store.playing = true;
-        }).catch(() => {
+        audio.play().catch(() => {
           // silently fail
         });
       }
