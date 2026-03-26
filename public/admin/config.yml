@@ -1,8 +1,8 @@
 backend:
   name: github
-  repo: owner/sottoSpirito
+  repo: gianmarco27/sottoSpirito
   branch: main
-  base_url: https://sottospirito-cms-auth.<your-subdomain>.workers.dev
+  base_url: https://sottospirito-cms-auth.philinx.workers.dev
 
 media_folder: /src/content/media
 public_folder: /content/media
@@ -24,7 +24,7 @@ media_libraries:
     access_key_id: <R2_ACCESS_KEY_ID>
     bucket: sottospirito-media
     account_id: <CLOUDFLARE_ACCOUNT_ID>
-    public_url: https://media.sottospirito.it
+    public_url: https://media.sottospirito.org
     prefix: episodes/
 
 collections:

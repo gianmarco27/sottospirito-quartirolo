@@ -34,6 +34,6 @@ export const UI = {
   site: {
     name: 'Sotto Spirito',
     description: 'Episodi audio pastorali per la comunità cristiana.',
-    url: 'https://sottospirito.it',
+    url: 'https://sottospirito.org',
   },
 } as const;
