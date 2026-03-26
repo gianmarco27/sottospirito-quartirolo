@@ -6,7 +6,7 @@
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://media.sottospirito.org; media-src 'self' https://media.sottospirito.it; connect-src 'self' https://media.sottospirito.org https://*.r2.cloudflarestorage.com https://api.github.com; frame-src 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' blob: data: https://*.githubusercontent.com https://media.sottospirito.org https://*.r2.cloudflarestorage.com; media-src 'self' https://media.sottospirito.org; connect-src 'self' blob: data: https://unpkg.com https://api.github.com https://www.githubstatus.com https://api.cloudflare.com https://media.sottospirito.org https://*.r2.cloudflarestorage.com; frame-src 'none'
 
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
