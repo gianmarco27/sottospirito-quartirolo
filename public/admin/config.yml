@@ -21,9 +21,9 @@ media_libraries:
         svg:
           optimize: true
   cloudflare_r2:
-    access_key_id: <R2_ACCESS_KEY_ID>
+    access_key_id: be7ba482aca152f1e217f73ddd737018
     bucket: sottospirito-media
-    account_id: <CLOUDFLARE_ACCOUNT_ID>
+    account_id: 108654d6cce94345d3d0ee34375ab0cf
     public_url: https://media.sottospirito.org
     prefix: episodes/
 
