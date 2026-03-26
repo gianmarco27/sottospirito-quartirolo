@@ -76,7 +76,7 @@ export function audioPlayer() {
       });
 
       this.audio.addEventListener('waiting', () => {
-        this.loading = true;
+        if (this.playing) this.loading = true;
       });
 
       this.audio.addEventListener('canplay', () => {
