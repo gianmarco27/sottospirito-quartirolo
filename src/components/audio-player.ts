@@ -107,6 +107,8 @@ export function audioPlayer() {
       }
     },
 
+    dragging: false,
+
     seek(event: MouseEvent | TouchEvent) {
       if (!this.audio || this.duration === 0) return;
 
@@ -118,6 +120,36 @@ export function audioPlayer() {
 
       this.audio.currentTime = newTime;
       this.currentTime = newTime;
+    },
+
+    startDrag(event: MouseEvent | TouchEvent) {
+      if (!this.audio || this.duration === 0) return;
+      this.dragging = true;
+
+      const bar = (event.currentTarget || event.target) as HTMLElement;
+      this.seek(event);
+
+      const onMove = (e: MouseEvent | TouchEvent) => {
+        const rect = bar.getBoundingClientRect();
+        const clientX = 'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX;
+        const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        const newTime = ratio * this.duration;
+        this.audio!.currentTime = newTime;
+        this.currentTime = newTime;
+      };
+
+      const onEnd = () => {
+        this.dragging = false;
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onEnd);
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', onEnd);
+      };
+
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onEnd);
+      document.addEventListener('touchmove', onMove, { passive: true });
+      document.addEventListener('touchend', onEnd);
     },
 
     seekRelative(seconds: number) {

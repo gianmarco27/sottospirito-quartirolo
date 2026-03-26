@@ -96,8 +96,8 @@ const { episodeSlug, audioUrl, title } = Astro.props;
 
     <!-- Progress bar -->
     <div
-      @click="seek($event)"
-      @touchstart.passive="seek($event)"
+      @mousedown="startDrag($event)"
+      @touchstart.passive="startDrag($event)"
       class="group relative h-2 cursor-pointer rounded-full bg-warm-sand"
       role="slider"
       :aria-valuenow="Math.round(currentTime)"
@@ -109,11 +109,13 @@ const { episodeSlug, audioUrl, title } = Astro.props;
       @keydown.right.prevent="seekRelative(10)"
     >
       <div
-        class="absolute inset-y-0 left-0 rounded-full bg-terracotta transition-[width] duration-100"
+        class="absolute inset-y-0 left-0 rounded-full bg-terracotta"
+        :class="dragging ? '' : 'transition-[width] duration-100'"
         :style="{ width: progressPercent + '%' }"
       ></div>
       <div
-        class="absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-terracotta opacity-0 shadow transition-opacity group-hover:opacity-100"
+        class="absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-terracotta shadow transition-opacity"
+        :class="dragging ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
         :style="{ left: `calc(${progressPercent}% - 8px)` }"
       ></div>
     </div>

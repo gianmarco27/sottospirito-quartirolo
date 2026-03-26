@@ -21,10 +21,15 @@ import { UI } from '@/lib/constants';
   aria-label={UI.labels.audioControls}
   class="fixed inset-x-0 bottom-0 z-40 border-t border-warm-sand bg-soft-white shadow-lg"
 >
-  <!-- Thin progress bar at top -->
-  <div class="h-1 bg-warm-sand">
+  <!-- Thin progress bar at top (draggable) -->
+  <div
+    class="h-3 -mb-2 cursor-pointer bg-warm-sand relative"
+    @mousedown="startDrag($event)"
+    @touchstart.passive="startDrag($event)"
+  >
     <div
-      class="h-full bg-terracotta transition-[width] duration-200"
+      class="absolute bottom-0 left-0 h-1 bg-terracotta"
+      :class="dragging ? '' : 'transition-[width] duration-200'"
       :style="{ width: progressPercent + '%' }"
     ></div>
   </div>
