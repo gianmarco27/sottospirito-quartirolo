@@ -62,11 +62,13 @@ export function audioPlayer() {
 
       this.audio.addEventListener('play', () => {
         this.playing = true;
+        this.loading = false;
         (Alpine.store('player') as Record<string, unknown>).playing = true;
       });
 
       this.audio.addEventListener('pause', () => {
         this.playing = false;
+        this.loading = false;
         (Alpine.store('player') as Record<string, unknown>).playing = false;
       });
 
