@@ -40,6 +40,14 @@
         width: 0%;
         transition: width 0.15s;
       }
+      .upload-bar-fill.indeterminate {
+        width: 30%;
+        animation: slide 1.2s ease-in-out infinite;
+      }
+      @keyframes slide {
+        0%   { transform: translateX(-100%); }
+        100% { transform: translateX(400%); }
+      }
       .upload-label {
         font-size: 14px;
         font-weight: 500;
@@ -55,77 +63,54 @@
     </div>
 
     <script>
-      // Intercept large uploads via XMLHttpRequest to show progress
+      // Show loading overlay for R2 file uploads (Sveltia CMS → Cloudflare R2 via fetch)
       (function () {
-        const THRESHOLD = 512 * 1024; // show overlay for uploads > 512 KB
-        const overlay = document.getElementById('upload-overlay');
-        const bar = document.getElementById('upload-bar');
-        const label = document.getElementById('upload-label');
+        var overlay = document.getElementById('upload-overlay');
+        var bar = document.getElementById('upload-bar');
+        var label = document.getElementById('upload-label');
+        var pending = 0;
 
-        const origOpen = XMLHttpRequest.prototype.open;
-        const origSend = XMLHttpRequest.prototype.send;
+        function show() {
+          pending++;
+          bar.style.width = '';
+          bar.classList.add('indeterminate');
+          label.textContent = 'Caricamento in corso…';
+          overlay.classList.add('active');
+        }
 
-        XMLHttpRequest.prototype.open = function (method) {
-          this._uploadMethod = method;
-          return origOpen.apply(this, arguments);
-        };
+        function hide(success) {
+          pending = Math.max(0, pending - 1);
+          if (pending > 0) return;
+          bar.classList.remove('indeterminate');
+          bar.style.width = '100%';
+          label.textContent = success ? 'Completato' : 'Errore durante il caricamento';
+          setTimeout(function () { overlay.classList.remove('active'); }, success ? 500 : 2000);
+        }
 
-        XMLHttpRequest.prototype.send = function (body) {
-          const size = body instanceof Blob ? body.size
-            : body instanceof ArrayBuffer ? body.byteLength
-            : typeof body === 'string' ? body.length
-            : 0;
+        function isR2Url(url) {
+          return typeof url === 'string' && url.indexOf('.r2.cloudflarestorage.com') !== -1;
+        }
 
-          if (size > THRESHOLD && /^(PUT|POST)$/i.test(this._uploadMethod || '')) {
-            overlay.classList.add('active');
-            bar.style.width = '0%';
-            label.textContent = 'Caricamento in corso…';
+        function isWriteMethod(m) { return /^(PUT|POST|PATCH)$/i.test(m || ''); }
 
-            this.upload.addEventListener('progress', function (e) {
-              if (e.lengthComputable) {
-                const pct = Math.round((e.loaded / e.total) * 100);
-                bar.style.width = pct + '%';
-                label.textContent = 'Caricamento… ' + pct + '%';
-              }
-            });
+        var origFetch = window.fetch;
+        window.fetch = function (input, init) {
+          var url, method;
 
-            const hide = function () { overlay.classList.remove('active'); };
-            this.upload.addEventListener('load', hide);
-            this.upload.addEventListener('error', function () {
-              label.textContent = 'Errore durante il caricamento';
-              setTimeout(hide, 2000);
-            });
-            this.addEventListener('loadend', hide);
+          if (input instanceof Request) {
+            url = input.url;
+            method = input.method;
+          } else {
+            url = String(input);
+            method = (init && init.method) || 'GET';
           }
 
-          return origSend.apply(this, arguments);
-        };
-
-        // Also wrap fetch for cases where the CMS uses fetch API
-        const origFetch = window.fetch;
-        window.fetch = function (input, init) {
-          const method = (init && init.method || 'GET').toUpperCase();
-          const body = init && init.body;
-          const size = body instanceof Blob ? body.size
-            : body instanceof ArrayBuffer ? body.byteLength
-            : typeof body === 'string' ? body.length
-            : 0;
-
-          if (size > THRESHOLD && (method === 'PUT' || method === 'POST')) {
-            overlay.classList.add('active');
-            bar.style.width = '5%';
-            label.textContent = 'Caricamento in corso…';
-
-            return origFetch.apply(this, arguments).then(function (response) {
-              bar.style.width = '100%';
-              label.textContent = 'Caricamento completato';
-              setTimeout(function () { overlay.classList.remove('active'); }, 600);
-              return response;
-            }).catch(function (err) {
-              label.textContent = 'Errore durante il caricamento';
-              setTimeout(function () { overlay.classList.remove('active'); }, 2000);
-              throw err;
-            });
+          if (isR2Url(url) && isWriteMethod(method)) {
+            show();
+            return origFetch.apply(this, arguments).then(
+              function (r) { hide(r.ok); return r; },
+              function (e) { hide(false); throw e; }
+            );
           }
 
           return origFetch.apply(this, arguments);
