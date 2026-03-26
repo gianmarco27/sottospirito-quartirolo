@@ -1,6 +1,6 @@
 backend:
   name: github
-  repo: gianmarco27/sottoSpirito
+  repo: gianmarco27/sottospirito-quartirolo
   branch: main
   base_url: https://sottospirito-cms-auth.philinx.workers.dev
 
