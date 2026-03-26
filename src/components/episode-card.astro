@@ -5,9 +5,7 @@
  *  - "full"    → 16:9 thumbnail, category tag, title, excerpt, metadata, play indicator
  *  - "compact" → smaller thumbnail + title + play indicator
  */
-import { Picture } from 'astro:assets';
 import { formatDate } from '@/lib/format-date';
-import type { ImageMetadata } from 'astro';
 
 export interface Props {
   slug: string;
@@ -16,7 +14,7 @@ export interface Props {
   publishDate: Date;
   duration: string;
   category: string;
-  infographic: ImageMetadata;
+  infographic: string;
   infographicAlt: string;
   size?: 'full' | 'compact';
   listened?: boolean;
@@ -53,12 +51,11 @@ const isCompact = size === 'compact';
     /* ── Compact variant ─────────────────────────────────────── */
     <div class="flex items-center gap-3 p-3">
       <div class="relative h-16 w-16 shrink-0 overflow-hidden rounded-md">
-        <Picture
+        <img
           src={infographic}
-          formats={['avif', 'webp']}
-          widths={[64, 128]}
-          sizes="64px"
           alt={infographicAlt || ''}
+          loading="lazy"
+          decoding="async"
           class="h-full w-full object-cover"
         />
       </div>
@@ -87,12 +84,11 @@ const isCompact = size === 'compact';
     /* ── Full variant ─────────────────────────────────────────── */
     <>
       <div class="relative aspect-video overflow-hidden">
-        <Picture
+        <img
           src={infographic}
-          formats={['avif', 'webp']}
-          widths={[400, 800]}
-          sizes="(min-width: 640px) 50vw, 100vw"
           alt={infographicAlt || ''}
+          loading="lazy"
+          decoding="async"
           class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
         {/* Category tag overlay */}

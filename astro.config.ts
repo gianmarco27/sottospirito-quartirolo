@@ -10,6 +10,10 @@ export default defineConfig({
   site: 'https://sottospirito.org',
   integrations: [sitemap()],
 
+  image: {
+    domains: ['media.sottospirito.org'],
+  },
+
   vite: {
     plugins: [tailwindcss()],
   },

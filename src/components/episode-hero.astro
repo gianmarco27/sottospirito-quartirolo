@@ -4,10 +4,8 @@
  * Displays infographic, title, metadata row, description, and AudioPlayer.
  * Responsive: single column mobile, 2-col desktop.
  */
-import { Picture } from 'astro:assets';
 import { formatDate } from '@/lib/format-date';
 import AudioPlayer from '@/components/audio-player.astro';
-import type { ImageMetadata } from 'astro';
 
 export interface Props {
   slug: string;
@@ -17,7 +15,7 @@ export interface Props {
   duration: string;
   category: string;
   audioUrl: string;
-  infographic: ImageMetadata;
+  infographic: string;
   infographicAlt: string;
 }
 
@@ -37,12 +35,11 @@ const {
 <header class="mb-8 md:grid md:grid-cols-2 md:gap-8">
   {/* Infographic */}
   <div class="mb-6 md:mb-0">
-    <Picture
+    <img
       src={infographic}
-      formats={['avif', 'webp']}
-      widths={[400, 800, 1200]}
-      sizes="(min-width: 768px) 50vw, 100vw"
       alt={infographicAlt || ''}
+      loading="eager"
+      decoding="async"
       class="w-full rounded-lg"
     />
   </div>

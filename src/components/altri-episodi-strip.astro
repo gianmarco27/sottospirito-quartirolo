@@ -6,7 +6,6 @@
  */
 import EpisodeCard from '@/components/episode-card.astro';
 import { UI } from '@/lib/constants';
-import type { ImageMetadata } from 'astro';
 
 export interface EpisodeItem {
   slug: string;
@@ -15,7 +14,7 @@ export interface EpisodeItem {
   publishDate: Date;
   duration: string;
   category: string;
-  infographic: ImageMetadata;
+  infographic: string;
   infographicAlt: string;
 }
 
