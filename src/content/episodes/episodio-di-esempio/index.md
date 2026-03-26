@@ -3,7 +3,7 @@ title: Episodio di esempio
 description: Questo è un episodio di esempio per verificare che il sistema funzioni correttamente. Sostituiscilo con un vero episodio quando sei pronto.
 publishDate: 2026-03-14
 audioUrl: https://media.sottospirito.org/episodes/episodio-di-esempio/audio.mp3
-infographic: infographic.png
+infographic: https://media.sottospirito.org/episodes/logo madonna della neve.png
 infographicAlt: Illustrazione di esempio per il primo episodio
 duration: 5:30
 tags:
